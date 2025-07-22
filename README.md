@@ -13,6 +13,23 @@ A robust RESTful API for a blogging platform, built with Node.js, Express, Mongo
 - **Comment on Posts** (only as authenticated user)
 - **Delete Your Own Comments**
 - **User Profile** (view and update name, email, and profile picture)
+- **Secure CORS** Configuration (controlled access from specified domains)
+
+- ## 🌐 Cross-Origin Resource Sharing (CORS)
+
+The API is configured with secure CORS policies to protect your data while allowing access from authorized domains.
+
+### Configured Origins
+```javascript
+{
+  origin: [
+    'http://localhost:5173', 
+    'https://your-production-frontend.com' 
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}
 
 ---
 
