@@ -1,102 +1,81 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import connectDB from './config/db.js';
-import userRouter from './route/userRoutes.js';
-import blogRouter from './route/blogsRoutes.js';
-import cors from 'cors';
-import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-import mongoSanitize from 'express-mongo-sanitize';
-import hpp from 'hpp';
-
-dotenv.config();
+const express = require("express");
+const mongoose = require("mongoose");
+const passport = require("passport");
+const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+const mongoSanitize = require("express-mongo-sanitize");
+const hpp = require("hpp");
+const xss = require("xss-clean");
+require("dotenv").config();
+require("./config/passport"); // Google OAuth config
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
-// =====================
-// CORS Configuration
-// =====================
+
+// Security Middlewares
+
+
+// 1. CORS Configuration
 const corsOptions = {
-  origin: ['http://localhost:5173', 'https://your-production-frontend-url.com'],
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || [
+    'http://localhost:3000', // React dev server
+    'http://localhost:5173'  // Vite dev server
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  optionsSuccessStatus: 200
+  credentials: true
 };
-
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Handle preflight requests
 
-// =====================
-// Security Middlewares
-// =====================
+// 2. Rate Limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 500, // limit each IP to 500 requestsper windowMs
+  max: 500, // limit each IP to 500 requests per windowMs
   message: 'Too many requests from this IP, please try again later'
 });
 app.use(limiter);
 
-app.use(helmet());
-app.use(mongoSanitize());
-app.use(hpp());
+// 3. Other Security Middlewares
+app.use(helmet()); 
+app.use(mongoSanitize()); 
+app.use(hpp()); 
+app.use(xss()); 
 
-// =====================
+
 // Standard Middlewares
-// =====================
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true }));
 
-// Serve static files
-app.use('/uploads', express.static('uploads'));
+app.use(express.json({ limit: '10kb' })); // Body limit
+app.use(passport.initialize());
 
-// =====================
-// Routes
-// =====================
-app.use('/api/users', userRouter);
-app.use('/api/blogs', blogRouter);
 
-// =====================
-// Health Check
-// =====================
-app.get('/', (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    message: 'Blog API is running',
-    timestamp: new Date()
-  });
+// Database Connection 
+
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+}).then(() => {
+    console.log("Connected to MongoDB");
+}).catch((err) => {
+    console.error("MongoDB connection error:", err);
 });
 
-// =====================
-// Error Handling
-// =====================
-app.use((req, res) => {
-  res.status(404).json({
-    status: 'error',
-    message: 'Endpoint not found'
-  });
-});
 
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    status: 'error',
-    message: 'Something went wrong!'
-  });
-});
+// Routes 
 
-// =====================
-// Server Initialization
-// =====================
+const blog = require("./routes/blog");
+const userRoutes = require("./routes/user");
+app.use("/api/v1", blog);
+app.use("/api/users", userRoutes);
+
+
+// Start the server 
+
 app.listen(PORT, () => {
-  connectDB();
-  console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`App is started at Port no ${PORT}`);
 });
 
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Rejection:', err);
-  process.exit(1);
+app.get("/", (req, res) => {
+    res.send(`<h1>This is my homePage </h1>`);
 });
-
-export default app;
