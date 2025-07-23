@@ -1,7 +1,7 @@
 {
   "name": "blogapp",
   "version": "1.0.0",
-  "description": "",
+  "description": "A robust RESTful API for a blogging platform, built with Node.js, Express, MongoDB, and Cloudinary. This API supports user authentication, blog post creation (with image upload), likes, comments, and user profile management.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -13,13 +13,28 @@
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.6.0",
     "express": "^4.21.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^8.0.1",
+    "helmet": "^8.1.0",
+    "hpp": "^0.2.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.8.7",
     "multer": "^2.0.1",
     "nodemon": "^3.1.10",
     "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0"
-  }
+    "passport-google-oauth20": "^2.0.0",
+    "xss-clean": "^0.1.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/priyaaaa-M/Blog_REST_API.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/priyaaaa-M/Blog_REST_API/issues"
+  },
+  "homepage": "https://github.com/priyaaaa-M/Blog_REST_API#readme"
 }
